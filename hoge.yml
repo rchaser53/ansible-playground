@@ -1,0 +1,29 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    port: 3306
+    socket: "/var/lib/mysql/mysql.sock"
+    datadir: "/var/lib/mysql"
+  tasks:
+    - name: yum install mysql
+      shell: echo 28 > 28.txt
+    #   with_items:
+    #     - {name: mysql,        repo: remi}
+    #     - {name: mysql-server, repo: remi}
+    #     - {name: mysql-devel,  repo: remi}
+    # - name: template my.cnf
+    #   template: src=etc/my.j2 dest=/etc/my.cnf mode=0644
+    #   notify: restart mysqld
+
+    # - name: permit bin files
+    #   file: path={{item}} mode=0744
+    #   with_fileglob:
+    #     - /root/bin/*
+
+    # - name: register
+    #   shell: touch /tmp/hoge creates=/tmp/hoge
+    #   register: result
+    # - name: print result
+    #   debug: msg="rc:{{result.rc}} stdout:{{result.stdout}} stdout:{{result.stderr}}"
+    #   when: result.stdout == ""
