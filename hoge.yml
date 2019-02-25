@@ -11,8 +11,4 @@
       shell: echo 25 > test.txt
 
     - name: kinit
-      shell: |
-        spawn kinit
-        expect "Password for *"
-        send -- '{{ password }}'
-        exit 0
+      shell: echo '{{ password }}' | kinit
