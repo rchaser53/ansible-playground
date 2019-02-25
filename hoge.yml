@@ -8,4 +8,11 @@
     ansible_sudo_pass: '{{ password }}'
   tasks:
     - name: hoge
-      shell: echo 23 > test.txt
+      shell: echo 25 > test.txt
+
+    - name: kinit
+      shell: |
+        spawn kinit
+        expect "Password for *"
+        send -- '{{ password }}'
+        exit 0
