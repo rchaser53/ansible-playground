@@ -1,14 +1,36 @@
-- hosts: bastion
-  # remote_user: yoshizawa.takayuki
-  # sudo: yes
+- hosts: localhost
   gather_facts: no
   vars:
-    ansible_ssh_user: '{{ login_user }}'
-    ansible_ssh_pass: '{{ password }}'
-    ansible_sudo_pass: '{{ password }}'
+    # ansible_ssh_user: '{{ login_user }}'
+    # ansible_ssh_pass: '{{ password }}'
+    # ansible_sudo_pass: '{{ password }}'
   tasks:
-    - name: hoge
-      shell: echo 25 > test.txt
+    - name: yum update
+      yum: name=* state=latest
+    
+    - name: install docker
+      yum: name=docker
+    
+    # - name: systemd setup for docker
+    #   systemd:
+    #     name: docker
+    #     enabled: yes
+    #     state: started
+    
+    - name: install docker-compose
+      become: yes
+      become_method: su
+      shell: |
+        curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 
-    - name: kinit
-      shell: echo '{{ password }}' | kinit
+    - name: create group docker
+      group:
+        name: docker
+        state: present
+
+    # - name: create docker network
+    #   shell: docker network create nginx_node
+    
+    - name: add path to bin & sbin
+      shell: echo -e '\nexport PATH=/usr/local/bin/:${PATH} \nexport PATH=/usr/sbin/:${PATH}' >> ~/.bash_profile
+        
