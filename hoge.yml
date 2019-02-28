@@ -1,36 +1,34 @@
-- hosts: localhost
-  gather_facts: no
+- name: test and build daemon server
+  hosts: 127.0.0.1
+  connection: local
   vars:
     # ansible_ssh_user: '{{ login_user }}'
     # ansible_ssh_pass: '{{ password }}'
-    # ansible_sudo_pass: '{{ password }}'
+    # ansible_sudo_pass: '{{ password }}'  
   tasks:
-    - name: yum update
-      yum: name=* state=latest
-    
-    - name: install docker
-      yum: name=docker
-    
-    # - name: systemd setup for docker
-    #   systemd:
-    #     name: docker
-    #     enabled: yes
-    #     state: started
-    
-    - name: install docker-compose
-      become: yes
-      become_method: su
+    - name: test and build
       shell: |
-        curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+        npm test
+        npm run build
+      register: return_from_shell
+      changed_when: no
 
-    - name: create group docker
-      group:
-        name: docker
-        state: present
+    - name: show previous shell stdout
+      debug:
+        msg: "{{ return_from_shell.stdout }}"
 
-    # - name: create docker network
-    #   shell: docker network create nginx_node
-    
-    - name: add path to bin & sbin
-      shell: echo -e '\nexport PATH=/usr/local/bin/:${PATH} \nexport PATH=/usr/sbin/:${PATH}' >> ~/.bash_profile
-        
+- name: deploy and restart systemd
+  hosts: webservers
+  tasks:
+    - name: copy
+      copy:
+        src: /home/hoge
+        dest: /home/
+        force: yes
+
+    - name: restart daemon
+      systemd:
+        state: restarted
+        name: daemon_something
+        enabled: true
+      become: true
