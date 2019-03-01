@@ -4,7 +4,10 @@
   vars:
     # ansible_ssh_user: '{{ login_user }}'
     # ansible_ssh_pass: '{{ password }}'
-    # ansible_sudo_pass: '{{ password }}'  
+    # ansible_sudo_pass: '{{ password }}'
+    bash_profile_path: ~/.bash_profile
+    local_bin_path: export PATH=/usr/local/bin/:${PATH}
+    sbin_path: export PATH=/usr/sbin/:${PATH}
   tasks:
     - name: test and build
       shell: |
@@ -17,14 +20,14 @@
       debug:
         msg: "{{ return_from_shell.stdout }}"
 
-- name: deploy and restart systemd
-  hosts: webservers
-  tasks:
-    - name: copy
-      copy:
-        src: /home/hoge
-        dest: /home/
-        force: yes
+    - name: deploy and restart systemd
+      hosts: webservers
+      tasks:
+        - name: copy
+          copy:
+            src: /home/hoge
+            dest: /home/
+            force: yes
 
     - name: restart daemon
       systemd:
@@ -32,3 +35,17 @@
         name: daemon_something
         enabled: true
       become: true
+
+    - name: add {{local_bin_path}} to path
+      shell: |
+        TARGET_STR=`cat {{ bash_profile_path }} | grep '{{ local_bin_path }}'`
+        if [ -z "$TARGET_STR" ]; then
+          echo '{{ local_bin_path }}' >> {{ bash_profile_path }}
+        fi
+
+    - name: add {{sbin_path}} to path
+      shell: |
+        TARGET_STR=`cat {{ bash_profile_path }} | grep '{{ sbin_path }}'`
+        if [ -z "$TARGET_STR" ]; then
+          echo '{{ sbin_path }}' >> {{ bash_profile_path }}
+        fi
